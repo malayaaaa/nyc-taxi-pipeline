@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: fct_trips
+    columns:
+      - name: trip_duration_minutes
+        tests:
+          - not_null
+  - name: agg_daily_summary
+    columns:
+      - name: trip_date
+        tests:
+          - not_null
+          - unique
