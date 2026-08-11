@@ -27,3 +27,5 @@ staged as (
 )
 
 select * from staged
+where pickup_datetime >= '2020-01-01'
+  and pickup_datetime <= current_timestamp()
