@@ -12,6 +12,8 @@ An end-to-end data engineering pipeline that ingests, transforms, and visualizes
 ## Architecture
 ![Architecture Diagram](screenshots/architecture_diagram.png)
 
+Raw parquet files are ingested with Python and landed in Snowflake, then transformed through dbt's staging and marts layers, and finally visualized in Looker Studio.
+
 ## Tools used
 
 - **Python** — data extraction and loading (pandas, snowflake-connector-python)
@@ -21,21 +23,20 @@ An end-to-end data engineering pipeline that ingests, transforms, and visualizes
 - **Git/GitHub** — version control
 
 ## Project structure
-taxi/
-├── data/ # raw data files (gitignored)
-├── screenshots/ # dashboard chart images
-├── ingest.py # loads taxi trip data into Snowflake
-├── load_zones.py # loads taxi zone lookup into Snowflake
-└── taxi_project/ # dbt project
-└── models/
-├── staging/
-│ ├── stg_taxi_trips.sql
-│ └── stg_taxi_zones.sql
-└── marts/
-├── fct_trips.sql
-├── agg_daily_summary.sql
-├── agg_fare_by_borough.sql
-└── agg_peak_hours.sql
+
+- `data/` — raw data files (gitignored)
+- `screenshots/` — dashboard chart images and architecture diagram
+- `ingest.py` — loads taxi trip data into Snowflake
+- `load_zones.py` — loads taxi zone lookup into Snowflake
+- `taxi_project/` — dbt project
+  - `models/staging/`
+    - `stg_taxi_trips.sql`
+    - `stg_taxi_zones.sql`
+  - `models/marts/`
+    - `fct_trips.sql`
+    - `agg_daily_summary.sql`
+    - `agg_fare_by_borough.sql`
+    - `agg_peak_hours.sql`
 
 ## Data dictionary
 
@@ -67,12 +68,15 @@ View the live interactive dashboard [here](https://datastudio.google.com/reporti
 ## Visualizations
 
 ### Daily Trip Volume
+Total taxi trips per calendar day across May 2026, revealing overall demand patterns and weekly rhythm across the month.
 ![Daily Trip Volume](screenshots/daily_trip_volume.png)
 
 ### Average Fare by Borough
+Average fare for trips picked up in each NYC borough, joined from the TLC taxi zone lookup table. "Other" includes trips with unresolved location data.
 ![Average Fare by Borough](screenshots/fare_by_borough.png)
 
-### Peak Hours Heatmap
+### Average trip volume by day of week and hour
+A heatmap showing average trips per hour, broken out by day of the week. Values are averaged across each weekday's occurrences in the month (e.g. all Fridays averaged together), not summed, so the numbers reflect a typical day rather than a monthly total.
 ![Peak Hours Heatmap](screenshots/peak_hours_heatmap.png)
 
 ## Key insights
