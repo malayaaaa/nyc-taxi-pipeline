@@ -50,6 +50,10 @@ taxi/
 5. `cd taxi_project` and run `dbt run` to build all models
 6. Run `dbt test` to validate data quality (7/7 tests passing)
 
+## Dashboard
+
+View the live interactive dashboard [here](https://datastudio.google.com/reporting/383e095f-d720-4357-ad55-37f3dd818c55).
+
 ## Visualizations
 
 ### Daily Trip Volume
