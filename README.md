@@ -54,15 +54,31 @@ Key columns in the final mart models:
 
 ## Data quality
 
-This project uses 10 dbt tests to validate the pipeline:
+Data quality is validated with 10 dbt tests across the pipeline, split into two categories: basic completeness checks and deeper logical checks.
 
-- **Not-null checks** on key columns (pickup/dropoff timestamps, fare, distance, trip date)
-- **Uniqueness check** on `agg_daily_summary.trip_date`
-- **Accepted values check** on `payment_type`, ensuring only valid NYC TLC payment codes appear
-- **Relationship check** confirming every `pu_location_id` in `fct_trips` exists in the taxi zone lookup table
-- **Custom range check** on `fare_amount`, flagging trips with a fare over $500 paired with a distance under 5 miles
+### Completeness checks (7 tests)
 
-The custom fare check currently flags 9 trips (out of ~3 million) — for example, a $5,525.99 fare on a 14-second, 0.39-mile ride. These are consistent with known metering or data-entry errors in the source data. Rather than silently filtering them out, the test is left failing intentionally so the anomaly stays visible and auditable, matching how a production data quality monitor would surface (not hide) unexpected records.
+These confirm that critical fields are never missing and that key records aren't duplicated:
+
+- `pickup_datetime`, `dropoff_datetime`, `trip_distance`, and `total_amount` in `stg_taxi_trips` are never null — a trip record without these fields is unusable for analysis
+- `trip_duration_minutes` in `fct_trips` is never null — confirms the pickup/dropoff calculation succeeded for every row
+- `trip_date` in `agg_daily_summary` is never null and never duplicated — confirms the daily aggregation has exactly one row per calendar day, with no gaps or double-counted days
+
+### Logical validity checks (3 tests)
+
+These go beyond "is it missing" to check whether the data actually makes sense:
+
+**Accepted values on `payment_type`** — NYC TLC's data dictionary defines only six valid payment type codes (1–6: credit card, cash, no charge, dispute, unknown, voided trip). This test fails if any other value appears, which would indicate either a parsing error in the source data or a schema change upstream that needs investigating.
+
+**Relationship check between `fct_trips` and `stg_taxi_zones`** — every trip has a pickup location ID (`pu_location_id`), and this ID should always correspond to a real taxi zone in the official TLC zone lookup table. This test verifies that referential integrity holds — if a trip pointed to a location ID with no matching zone, it would silently break any borough-level analysis (like the fare-by-borough chart) without this test to catch it.
+
+**Custom range check on `fare_amount`** — a hand-written test (not a built-in dbt test) that flags any trip with a fare over $500 paired with a distance under 5 miles, or any negative fare. Straightforward "fare > $X" checks turned out to be too blunt: legitimate long-distance trips (over 100 miles, several hours) can have fares well above $500 and are not errors. The test instead combines fare *and* distance, so it isolates the real anomaly — a high fare on an implausibly short trip — while leaving genuine long trips alone.
+
+### Known finding: 9 flagged trips
+
+This custom fare test currently fails, flagging 9 trips out of roughly 3 million. Investigating them directly in Snowflake showed a clear pattern: each one has an extremely high fare (up to $5,525.99) paired with a trip lasting well under a minute and covering under half a mile — for example, a $5,525.99 fare on a 14-second, 0.39-mile ride. This is consistent with a metering or data-entry error at the source, not a real trip.
+
+Rather than silently filtering these 9 rows out of the pipeline, the test is left in a failing state on purpose. The reasoning: a passing test suite that never catches anything doesn't actually demonstrate that the checks work, and quietly dropping anomalous rows makes them invisible to anyone auditing the pipeline later. Leaving the test failing — with the finding documented here — mirrors how a real production data quality monitor is meant to work: surface unexpected records for a human to review, rather than making an automatic judgment call about which real-world trips are "wrong."
 
 ## How to run this
 
