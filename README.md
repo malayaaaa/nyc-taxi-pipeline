@@ -10,11 +10,7 @@ An end-to-end data engineering pipeline that ingests, transforms, and visualizes
 - Visualizes key metrics in Looker Studio: daily trip volume, average fare by borough, and peak hours by day/hour
 
 ## Architecture
-NYC TLC Open Data (Parquet) → Python (pandas) → Snowflake (RAW)
-↓
-dbt (STAGING/MARTS)
-↓
-Looker Studio
+![Architecture Diagram](screenshots/architecture_diagram.png)
 
 ## Tools used
 
