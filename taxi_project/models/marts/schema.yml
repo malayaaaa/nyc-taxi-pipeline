@@ -6,6 +6,11 @@ models:
       - name: trip_duration_minutes
         tests:
           - not_null
+      - name: pu_location_id
+        tests:
+          - relationships:
+              to: ref('stg_taxi_zones')
+              field: locationid
   - name: agg_daily_summary
     columns:
       - name: trip_date

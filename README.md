@@ -52,6 +52,18 @@ Key columns in the final mart models:
 | `hour_label` | `agg_peak_hours` | Hour of day formatted as 12-hour time (e.g. "6 PM") for display |
 | `borough` | `agg_fare_by_borough` | NYC borough of the pickup location, joined from the TLC zone lookup table; "Other" includes unresolved zones |
 
+## Data quality
+
+This project uses 10 dbt tests to validate the pipeline:
+
+- **Not-null checks** on key columns (pickup/dropoff timestamps, fare, distance, trip date)
+- **Uniqueness check** on `agg_daily_summary.trip_date`
+- **Accepted values check** on `payment_type`, ensuring only valid NYC TLC payment codes appear
+- **Relationship check** confirming every `pu_location_id` in `fct_trips` exists in the taxi zone lookup table
+- **Custom range check** on `fare_amount`, flagging trips with a fare over $500 paired with a distance under 5 miles
+
+The custom fare check currently flags 9 trips (out of ~3 million) — for example, a $5,525.99 fare on a 14-second, 0.39-mile ride. These are consistent with known metering or data-entry errors in the source data. Rather than silently filtering them out, the test is left failing intentionally so the anomaly stays visible and auditable, matching how a production data quality monitor would surface (not hide) unexpected records.
+
 ## How to run this
 
 1. Clone this repo
@@ -59,7 +71,7 @@ Key columns in the final mart models:
 3. Install dependencies: `pip install pandas pyarrow snowflake-connector-python python-dotenv dbt-snowflake`
 4. Run `python3 ingest.py` and `python3 load_zones.py` to load raw data
 5. `cd taxi_project` and run `dbt run` to build all models
-6. Run `dbt test` to validate data quality (7/7 tests passing)
+6. Run `dbt test` to validate data quality (9/10 tests passing — see Data Quality section)
 
 ## Dashboard
 

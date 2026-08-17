@@ -15,3 +15,8 @@ models:
       - name: total_amount
         tests:
           - not_null
+      - name: payment_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['1', '2', '3', '4', '5', '6']
