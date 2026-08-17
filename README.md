@@ -37,6 +37,20 @@ taxi/
 ├── agg_fare_by_borough.sql
 └── agg_peak_hours.sql
 
+## Data dictionary
+
+Key columns in the final mart models:
+
+| Column | Model | Description |
+|---|---|---|
+| `trip_duration_minutes` | `fct_trips` | Minutes between pickup and dropoff, calculated from raw timestamps |
+| `cost_per_mile` | `fct_trips` | Total fare divided by trip distance, null if distance is zero |
+| `trip_count` | `agg_daily_summary`, `agg_peak_hours` | Number of trips in the given grouping (day, or day/hour) |
+| `avg_fare` | `agg_fare_by_borough` | Average fare amount for trips picked up in that borough |
+| `day_order` | `agg_peak_hours` | Numeric Mon=1–Sun=7 mapping, used to sort day names chronologically |
+| `hour_label` | `agg_peak_hours` | Hour of day formatted as 12-hour time (e.g. "6 PM") for display |
+| `borough` | `agg_fare_by_borough` | NYC borough of the pickup location, joined from the TLC zone lookup table; "Other" includes unresolved zones |
+
 ## How to run this
 
 1. Clone this repo
