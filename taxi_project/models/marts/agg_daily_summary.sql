@@ -4,6 +4,7 @@ with trips as (
 
 select
     cast(pickup_datetime as date) as trip_date,
+    day(cast(pickup_datetime as date)) as day_of_month,
     count(*) as trip_count,
     round(avg(fare_amount), 2) as avg_fare,
     round(avg(trip_distance), 2) as avg_distance,
