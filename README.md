@@ -12,7 +12,7 @@ An end-to-end data engineering pipeline that ingests, transforms, and visualizes
 ## Architecture
 ![Architecture Diagram](screenshots/architecture_diagram.png)
 
-Raw parquet files are ingested with Python and landed in Snowflake, then transformed through dbt's staging and marts layers, and finally visualized in Looker Studio.
+Raw parquet files are ingested with Python and loaded in Snowflake, then transformed through dbt's staging and marts layers, and finally visualized in Looker Studio.
 
 ## Tools used
 
@@ -82,12 +82,17 @@ Rather than silently filtering these 9 rows out of the pipeline, the test is lef
 
 ## How to run this
 
+## How to run this
+
 1. Clone this repo
-2. Create a `.env` file with your Snowflake credentials (see `.env.example`)
-3. Install dependencies: `pip install pandas pyarrow snowflake-connector-python python-dotenv dbt-snowflake`
-4. Run `python3 ingest.py` and `python3 load_zones.py` to load raw data
-5. `cd taxi_project` and run `dbt run` to build all models
-6. Run `dbt test` to validate data quality (9/10 tests passing — see Data Quality section)
+2. Download the source data:
+   - [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) — download the May 2026 Yellow Taxi parquet file into `data/`
+   - [Taxi Zone Lookup Table](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) (same page, scroll to "Taxi Zone Lookup Table") — download the CSV into `data/`
+3. Create a `.env` file with your Snowflake credentials (see `.env.example`)
+4. Install dependencies: `pip install pandas pyarrow snowflake-connector-python python-dotenv dbt-snowflake`
+5. Run `python3 ingest.py` and `python3 load_zones.py` to load raw data
+6. `cd taxi_project` and run `dbt run` to build all models
+7. Run `dbt test` to validate data quality (9/10 tests passing — see Data Quality section)
 
 ## Dashboard
 
